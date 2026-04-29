@@ -61,6 +61,9 @@ MODEL_XML = """
           pos="2.0 3.6 0.40" material="obs_r_mat" contype="2" conaffinity="0"/>
     <geom name="obs_d" type="box"      size="0.35 0.20 0.35"
           pos="0.6 2.0 0.35" material="obs_g_mat" contype="2" conaffinity="0"/>
+    <!-- Test obstacle in direct path -->
+    <geom name="obs_test" type="box" size="0.50 0.50 0.60"
+          pos="2.0 2.0 0.60" material="obs_r_mat" contype="2" conaffinity="0"/>
 
     <!-- AMR body - three free planar DOFs -->
     <body name="base" pos="0 0 0.12">
@@ -124,12 +127,13 @@ DEPTH_INTERVAL     = 2000     # print depth stats every N sim steps
 
 # ── Controller config ──────────────────────────────────────────────────────────
 GOAL      = np.array([4.0, 4.0])
-MAX_VEL   = 0.01              # m/s
+MAX_VEL   = 0.1             # m/s
 MAX_YAW   = 1.2               # rad/s
 K_P_POS   = 1.0
 K_P_YAW   = 2.5
 ARRIVE_R  = 0.12
 WHEEL_R   = 0.07
+OBSTACLE_THRESHOLD = 1.0   # meters - avoid obstacles closer than this
 
 
 # ── Navigation helpers ─────────────────────────────────────────────────────────
@@ -138,7 +142,7 @@ def get_yaw(data):  return float(data.qpos[2])
 def angle_wrap(a):  return (a + np.pi) % (2 * np.pi) - np.pi
 
 
-def compute_controls(data):
+def compute_controls(data, ranges):
     pos  = get_pos(data)
     err  = GOAL - pos
     dist = np.linalg.norm(err)
@@ -150,6 +154,21 @@ def compute_controls(data):
     vx    = speed * np.cos(desired_yaw)
     vy    = speed * np.sin(desired_yaw)
     v_yaw = np.clip(K_P_YAW * yaw_err, -MAX_YAW, MAX_YAW)
+
+    # Obstacle avoidance using LiDAR
+    min_range = np.min(ranges)
+    if min_range < OBSTACLE_THRESHOLD:
+        print(f"Obstacle detected at {min_range:.2f}m (angle: {_LIDAR_ANGLES[np.argmin(ranges)]:.2f} rad), avoiding...")
+        # Strong avoidance: turn 90 degrees away from obstacle
+        min_idx = np.argmin(ranges)
+        obstacle_angle = _LIDAR_ANGLES[min_idx]
+        desired_yaw = obstacle_angle + np.pi / 2  # perpendicular turn
+        yaw_err = angle_wrap(desired_yaw - get_yaw(data))
+        speed = 0.05  # reduced speed for careful avoidance
+        vx = speed * np.cos(desired_yaw)
+        vy = speed * np.sin(desired_yaw)
+        v_yaw = np.clip(2.0 * yaw_err, -MAX_YAW, MAX_YAW)  # stronger turning gain
+
     return np.array([vx, vy, v_yaw]), np.linalg.norm([vx, vy]) / WHEEL_R
 
 
@@ -246,7 +265,8 @@ def main():
 
             # ── navigation ──────────────────────────────────────────────────
             if not arrived:
-                ctrl, wheel_spin = compute_controls(data)
+                ranges = scan_lidar(model, data, pos)
+                ctrl, wheel_spin = compute_controls(data, ranges)
                 data.ctrl[:]  = ctrl
                 data.qvel[3]  =  wheel_spin
                 data.qvel[4]  = -wheel_spin
@@ -263,7 +283,6 @@ def main():
                     break
 
             # ── 2-D LiDAR scan + visualise ──────────────────────────────────
-            ranges = scan_lidar(model, data, pos)
             if hasattr(viewer, 'user_scn') and viewer.user_scn.maxgeom > 0:
                 draw_lidar(viewer.user_scn, pos, ranges)
 
