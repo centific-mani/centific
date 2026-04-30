@@ -60,22 +60,23 @@ MODEL_XML = """
     </body>
 
     <!-- contype="2" → detected by mj_ray; robot has contype=0 → no collision -->
-    <geom name="obs_a"    type="box"      size="0.30 0.30 0.45"
-          pos="1.0 3.0 0.45" material="obs_r_mat" contype="2" conaffinity="0"/>
-    <geom name="obs_b"    type="box"      size="0.25 0.40 0.50"
-          pos="3.2 1.0 0.50" material="obs_g_mat" contype="2" conaffinity="0"/>
-    <geom name="obs_c"    type="cylinder" size="0.20 0.40"
-          pos="2.0 3.6 0.40" material="obs_r_mat" contype="2" conaffinity="0"/>
+    <!-- Slalom layout: obstacles spread left/right of diagonal path with ~0.9m+ corridors -->
     <geom name="obs_d"    type="box"      size="0.35 0.20 0.35"
-          pos="0.6 2.0 0.35" material="obs_g_mat" contype="2" conaffinity="0"/>
-    <geom name="obs_test" type="box"      size="0.50 0.50 0.60"
-          pos="2.0 2.0 0.60" material="obs_r_mat" contype="2" conaffinity="0"/>
-    <geom name="obs_e"    type="box"      size="0.22 0.25 0.40"
-          pos="3.8 2.0 0.40" material="obs_b_mat" contype="2" conaffinity="0"/>
+          pos="0.6 1.2 0.35" material="obs_g_mat" contype="2" conaffinity="0"/>
     <geom name="obs_f"    type="cylinder" size="0.22 0.35"
-          pos="1.5 1.0 0.35" material="obs_b_mat" contype="2" conaffinity="0"/>
+          pos="1.5 0.7 0.35" material="obs_b_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_b"    type="box"      size="0.25 0.40 0.50"
+          pos="3.5 1.2 0.50" material="obs_g_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_a"    type="box"      size="0.30 0.30 0.45"
+          pos="0.8 2.5 0.45" material="obs_r_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_test" type="box"      size="0.25 0.25 0.50"
+          pos="2.2 2.0 0.50" material="obs_r_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_e"    type="box"      size="0.22 0.25 0.40"
+          pos="3.5 3.0 0.40" material="obs_b_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_c"    type="cylinder" size="0.20 0.40"
+          pos="2.0 3.8 0.40" material="obs_r_mat" contype="2" conaffinity="0"/>
     <geom name="obs_g"    type="box"      size="0.25 0.22 0.38"
-          pos="2.8 3.5 0.38" material="obs_b_mat" contype="2" conaffinity="0"/>
+          pos="3.3 3.8 0.38" material="obs_b_mat" contype="2" conaffinity="0"/>
 
     <body name="base" pos="0 0 0.12">
       <!-- Robot chassis mass = 20 kg, drives the capacity calculation -->
