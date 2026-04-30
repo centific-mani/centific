@@ -20,6 +20,7 @@ import heapq
 import numpy as np
 import mujoco
 import mujoco.viewer
+from amr_payload import PayloadManager
 
 # ── XML model ──────────────────────────────────────────────────────────────────
 MODEL_XML = """
@@ -49,10 +50,14 @@ MODEL_XML = """
     <geom name="floor" type="plane" size="8 8 0.1"
           material="floor_mat" contype="0" conaffinity="0" pos="2 2 0"/>
 
-    <geom name="goal"  type="cylinder" size="0.18 0.01" pos="4 4 0.01"
-          material="goal_mat"  contype="0" conaffinity="0"/>
     <geom name="start" type="cylinder" size="0.12 0.01" pos="0 0 0.01"
           material="trail_mat" contype="0" conaffinity="0"/>
+
+    <!-- Goal marker: mocap body so data.mocap_pos sets it from GOAL at runtime -->
+    <body name="goal_marker" mocap="true" pos="0 0 0">
+      <geom type="cylinder" size="0.20 0.012"
+            rgba="0.10 0.90 0.30 0.85" contype="0" conaffinity="0"/>
+    </body>
 
     <!-- contype="2" → detected by mj_ray; robot has contype=0 → no collision -->
     <geom name="obs_a"    type="box"      size="0.30 0.30 0.45"
@@ -73,6 +78,8 @@ MODEL_XML = """
           pos="2.8 3.5 0.38" material="obs_b_mat" contype="2" conaffinity="0"/>
 
     <body name="base" pos="0 0 0.12">
+      <!-- Robot chassis mass = 20 kg, drives the capacity calculation -->
+      <inertial pos="0 0 0" mass="20" diaginertia="0.20 0.36 0.49"/>
       <joint name="slide_x"   type="slide" axis="1 0 0" damping="5"/>
       <joint name="slide_y"   type="slide" axis="0 1 0" damping="5"/>
       <joint name="hinge_yaw" type="hinge" axis="0 0 1" damping="3"/>
@@ -83,6 +90,12 @@ MODEL_XML = """
             material="body_mat" contype="0" conaffinity="0" group="1"/>
       <geom name="sensor_top" type="cylinder" size="0.06 0.04" pos="0.10 0 0.07"
             material="body_mat" contype="0" conaffinity="0" group="1"/>
+      <!-- Cargo body: mass injected at runtime via model.body_mass -->
+      <body name="cargo_body" pos="0 0 0.15">
+        <inertial pos="0 0 0" mass="0.001" diaginertia="1e-6 1e-6 1e-6"/>
+        <geom name="cargo" type="box" size="0.16 0.12 0.08"
+              rgba="0 0 0 0" contype="0" conaffinity="0" group="1"/>
+      </body>
 
       <body name="wheel_left" pos="-0.05 0.18 -0.05">
         <joint name="wheel_left_spin" type="hinge" axis="0 1 0" damping="0.3"/>
@@ -323,6 +336,7 @@ def draw_lidar(scn, pos2d, ranges):
         _add_ray_capsule(scn, origin, angle, r, rgba)
 
 
+
 # ── Depth camera ───────────────────────────────────────────────────────────────
 def print_depth_stats(renderer, data, step):
     renderer.update_scene(data, camera="depth_cam")
@@ -336,6 +350,152 @@ def print_depth_stats(renderer, data, step):
               f"({valid.size}/{depth.size} valid px)")
 
 
+# ── Console reports ───────────────────────────────────────────────────────────
+def _print_startup_report(payload):
+    from amr_payload import (MAX_CAPACITY_KG, ROBOT_BASE_MASS,
+                              KV_SLIDE, DAMPING_SLIDE,
+                              _F_PEAK_SINGLE, _F_PEAK_COMBINED,
+                              _SAFETY_MARGIN, _F_SAFE,
+                              _DESIGN_ACCEL, _M_TOTAL_MAX,
+                              CARGO_HALF, CATALOGUE, _box_inertia)
+    sep = "=" * 60
+    print(f"\n{sep}")
+    print("  AMR SIMULATION — STARTUP WEIGHT REPORT")
+    print(sep)
+
+    # ── Robot base specs ───────────────────────────────────────────────────────
+    print("\n  [1] ROBOT BASE SPECIFICATIONS")
+    print(f"      Chassis mass          : {ROBOT_BASE_MASS:.1f} kg"
+          f"  (from XML <inertial mass=\"{ROBOT_BASE_MASS:.0f}\">)")
+    print(f"      Max velocity          : {MAX_VEL} m/s")
+    print(f"      Slide joint damping   : {DAMPING_SLIDE} N·s/m"
+          f"  (from XML <joint damping=\"{DAMPING_SLIDE:.0f}\">)")
+    print(f"      Actuator gain (kv)    : {KV_SLIDE} N·s/m"
+          f"  (from XML <velocity kv=\"{KV_SLIDE:.0f}\">)")
+
+    # ── Capacity derivation ────────────────────────────────────────────────────
+    print("\n  [2] MAX CAPACITY DERIVATION  (step by step)")
+    print(f"      Peak force per axis   = kv × MAX_VEL")
+    print(f"                            = {KV_SLIDE} × {MAX_VEL}")
+    print(f"                            = {_F_PEAK_SINGLE:.2f} N")
+    print(f"      Combined (x + y axes) = {_F_PEAK_SINGLE:.2f} × √2")
+    print(f"                            = {_F_PEAK_COMBINED:.2f} N")
+    print(f"      Safety margin         = {_SAFETY_MARGIN}  →  "
+          f"safe force = {_F_SAFE:.2f} N")
+    print(f"      Min design accel      = {_DESIGN_ACCEL} m/s²")
+    print(f"      Max total mass        = {_F_SAFE:.2f} / {_DESIGN_ACCEL}")
+    print(f"                            = {_M_TOTAL_MAX:.2f} kg")
+    print(f"      Minus robot base mass = {_M_TOTAL_MAX:.2f} − {ROBOT_BASE_MASS:.1f}")
+    print(f"      ┌─────────────────────────────────────────────────┐")
+    print(f"      │  MAX PAYLOAD CAPACITY = {MAX_CAPACITY_KG:.1f} kg              │")
+    print(f"      └─────────────────────────────────────────────────┘")
+
+    # ── Cargo currently loaded ─────────────────────────────────────────────────
+    print("\n  [3] CARGO LOADED AT STARTUP")
+    if not payload.loaded_items:
+        print("      No cargo loaded — robot is empty.")
+    else:
+        total = 0.0
+        for name in payload.loaded_items:
+            item = CATALOGUE[name]
+            w    = item["weight_kg"]
+            total += w
+            inertia = _box_inertia(w, CARGO_HALF)
+            print(f"      Item     : {name}  ({item['label']})")
+            print(f"      Weight   : {w:.1f} kg  → injected into model.body_mass")
+            print(f"      Inertia  : Ixx={inertia[0]:.4f}  "
+                  f"Iyy={inertia[1]:.4f}  Izz={inertia[2]:.4f}  kg·m²")
+            print()
+
+        pct     = payload.load_percent()
+        bar_len = 30
+        filled  = int(min(pct, 100) / 100 * bar_len)
+        bar     = "█" * filled + "░" * (bar_len - filled)
+        print(f"      Total declared weight : {total:.1f} kg")
+        print(f"      Capacity used         : [{bar}] {pct:.1f}%")
+        print(f"      Remaining headroom    : {MAX_CAPACITY_KG - total:.1f} kg")
+        print(f"      Cargo box colour      : {payload.state_label()}"
+              f"  → {'green' if pct<60 else 'orange' if pct<90 else 'red'}")
+
+    # ── Available catalogue ────────────────────────────────────────────────────
+    print("\n  [4] FULL WAREHOUSE CATALOGUE")
+    print(f"      {'Item':<16}  {'Weight':>8}   Can carry?   Label")
+    print(f"      {'────':<16}  {'──────':>8}   ──────────   ─────")
+    for name, item in CATALOGUE.items():
+        w         = item["weight_kg"]
+        headroom  = MAX_CAPACITY_KG - payload.current_weight
+        feasible  = "✓  yes" if w <= headroom else "✗  too heavy"
+        print(f"      {name:<16}  {w:>6.1f} kg   {feasible:<12} {item['label']}")
+
+    print(f"\n{sep}\n")
+
+
+def _print_final_report(payload, pos, elapsed_time, replan_count,
+                         map_cells, peak_effort):
+    from amr_payload import MAX_CAPACITY_KG, _F_PEAK_COMBINED, CATALOGUE
+    sep = "=" * 60
+    print(f"\n{sep}")
+    print("  AMR SIMULATION — FINAL WEIGHT & JOURNEY REPORT")
+    print(sep)
+
+    # ── Journey summary ────────────────────────────────────────────────────────
+    print("\n  [1] JOURNEY SUMMARY")
+    print(f"      Start position    : (0.00, 0.00)")
+    print(f"      Final position    : ({pos[0]:.3f}, {pos[1]:.3f})")
+    print(f"      Goal              : ({GOAL[0]:.1f}, {GOAL[1]:.1f})")
+    print(f"      Travel time       : {elapsed_time:.1f} s")
+    print(f"      Path replans      : {replan_count}  "
+          f"(A* re-ran each time new obstacle cells found)")
+    print(f"      Obstacle cells    : {map_cells}  "
+          f"(discovered dynamically via LiDAR)")
+
+    # ── Final payload state ────────────────────────────────────────────────────
+    print("\n  [2] FINAL PAYLOAD STATE")
+    if not payload.loaded_items:
+        print("      No cargo was carried.")
+    else:
+        total = payload.current_weight
+        pct   = payload.load_percent()
+        bar_len = 30
+        filled  = int(min(pct, 100) / 100 * bar_len)
+        bar     = "█" * filled + "░" * (bar_len - filled)
+        print(f"      Items carried     : {', '.join(payload.loaded_items)}")
+        print(f"      Total weight      : {total:.1f} kg")
+        print(f"      Max capacity      : {MAX_CAPACITY_KG:.1f} kg")
+        print(f"      Capacity used     : [{bar}] {pct:.1f}%")
+        print(f"      Status            : {payload.state_label()}")
+
+    # ── Motor effort analysis ──────────────────────────────────────────────────
+    print("\n  [3] MOTOR EFFORT ANALYSIS  (from data.actuator_force)")
+    print(f"      Peak motor effort     : {peak_effort:.3f} N")
+    print(f"      Motor peak capacity   : {_F_PEAK_COMBINED:.2f} N  "
+          f"(kv × MAX_VEL × √2)")
+    utilisation = (peak_effort / _F_PEAK_COMBINED) * 100
+    print(f"      Peak utilisation      : {utilisation:.1f}%")
+    avg_effort  = payload.measured_effort_n
+    print(f"      Final avg effort      : {avg_effort:.3f} N  "
+          f"(200-step rolling mean)")
+    print(f"      Effort vs. capacity   : "
+          f"{'within safe range' if utilisation < 70 else 'near limit'}")
+
+    # ── Weight impact on physics ───────────────────────────────────────────────
+    print("\n  [4] HOW WEIGHT AFFECTED THE PHYSICS")
+    print(f"      Robot base mass           : 20.0 kg")
+    print(f"      Cargo mass injected       : {payload.current_weight:.1f} kg"
+          f"  → model.body_mass updated")
+    total_moving = 20.0 + payload.current_weight
+    print(f"      Total moving mass         : {total_moving:.1f} kg")
+    force_needed = total_moving * 0.5
+    print(f"      Force to accelerate @ 0.5m/s² : "
+          f"{total_moving:.1f} × 0.5 = {force_needed:.1f} N")
+    print(f"      Motor safe force available: {_F_PEAK_COMBINED * 0.7:.1f} N")
+    margin = _F_PEAK_COMBINED * 0.7 - force_needed
+    print(f"      Safety margin remaining   : {margin:.1f} N  "
+          f"({'OK' if margin > 0 else 'OVERLOADED'})")
+
+    print(f"\n{sep}\n")
+
+
 # ── Main ───────────────────────────────────────────────────────────────────────
 def main():
     model    = mujoco.MjModel.from_xml_string(MODEL_XML)
@@ -343,7 +503,25 @@ def main():
     renderer = mujoco.Renderer(model, DEPTH_H, DEPTH_W)
     renderer.enable_depth_rendering()
     mujoco.mj_resetData(model, data)
+    # Position the goal marker from the GOAL variable — change GOAL above to move it
+    data.mocap_pos[0, :] = [GOAL[0], GOAL[1], 0.012]
     mujoco.mj_forward(model, data)
+
+    # ── Payload system ─────────────────────────────────────────────────────────
+    payload        = PayloadManager(robot_name="AMR-01")
+    cargo_body_id  = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "cargo_body")
+    cargo_geom_id  = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "cargo")
+
+    # ── Load demo cargo — edit item names to test different weights ────────────
+    for item in ["medium_box"]:    # try "large_box", "heavy_part", "overload_item"
+        ok, msg = payload.load(item, model, data, cargo_body_id)
+        print(f"  {'✓' if ok else '✗'} {msg}")
+
+    # Colour the cargo geom to match load state
+    model.geom_rgba[cargo_geom_id, :] = payload.cargo_rgba()
+
+    # ── STARTUP WEIGHT REPORT ─────────────────────────────────────────────────
+    _print_startup_report(payload)
 
     # ── Dynamic map: starts completely empty ───────────────────────────────────
     grid       = np.zeros((GRID_ROWS, GRID_COLS), dtype=bool)
@@ -357,12 +535,13 @@ def main():
     print(f"  Initial plan: {len(waypoints)} waypoints (straight line, no obstacles known yet)")
     print()
 
-    arrived     = False
-    hold_time   = 0.0
-    HOLD_SECS   = 2.0
-    step        = 0
+    arrived      = False
+    hold_time    = 0.0
+    HOLD_SECS    = 2.0
+    step         = 0
     replan_count = 0
-    ranges      = np.full(LIDAR_RAYS, LIDAR_RANGE)
+    ranges       = np.full(LIDAR_RAYS, LIDAR_RANGE)
+    peak_effort  = 0.0          # track highest motor force seen during run
 
     print(f"  Target   : {GOAL}")
     print(f"  Max vel  : {MAX_VEL} m/s")
@@ -418,11 +597,8 @@ def main():
                 if np.linalg.norm(GOAL - pos) < ARRIVE_R:
                     arrived      = True
                     data.ctrl[:] = 0.0
-                    print(f"\n  *** Arrived at goal!  "
-                          f"pos=({pos[0]:.3f},{pos[1]:.3f})  "
-                          f"t={data.time:.1f}s  "
-                          f"replans={replan_count}  "
-                          f"map cells={total_hits} ***")
+                    _print_final_report(payload, pos, data.time,
+                                        replan_count, total_hits, peak_effort)
             else:
                 data.qvel[3]  = 0.0
                 data.qvel[4]  = 0.0
@@ -430,6 +606,12 @@ def main():
                 if hold_time > HOLD_SECS:
                     print("  Done. Closing viewer.")
                     break
+
+            # ── Payload: read real motor forces + update colour ────────────────
+            payload.read_motor_effort(data)
+            model.geom_rgba[cargo_geom_id, :] = payload.cargo_rgba()
+            if payload.measured_effort_n > peak_effort:
+                peak_effort = payload.measured_effort_n
 
             # ── Visualise ──────────────────────────────────────────────────────
             if hasattr(viewer, 'user_scn') and viewer.user_scn.maxgeom > 0:
