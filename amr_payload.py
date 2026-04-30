@@ -23,7 +23,7 @@ ROBOT_BASE_MASS = 20.0    # kg  — robot chassis (set in <inertial mass="20">)
 MAX_VEL         = 0.35    # m/s — from amr_simulation.py MAX_VEL
 
 # ── Cargo box half-dimensions (must match XML geom size) ──────────────────────
-CARGO_HALF = np.array([0.16, 0.12, 0.08])   # metres
+CARGO_HALF = np.array([0.24, 0.18, 0.12])   # metres
 
 # ── Max capacity derivation ────────────────────────────────────────────────────
 # Each slide motor peak force = kv × MAX_VEL = 120 × 0.35 = 42 N

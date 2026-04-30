@@ -78,41 +78,41 @@ MODEL_XML = """
     <geom name="obs_g"    type="box"      size="0.25 0.22 0.38"
           pos="3.3 3.8 0.38" material="obs_b_mat" contype="2" conaffinity="0"/>
 
-    <body name="base" pos="0 0 0.12">
+    <body name="base" pos="0 0 0.18">
       <!-- Robot chassis mass = 20 kg, drives the capacity calculation -->
-      <inertial pos="0 0 0" mass="20" diaginertia="0.20 0.36 0.49"/>
+      <inertial pos="0 0 0" mass="20" diaginertia="0.45 0.81 1.10"/>
       <joint name="slide_x"   type="slide" axis="1 0 0" damping="5"/>
       <joint name="slide_y"   type="slide" axis="0 1 0" damping="5"/>
       <joint name="hinge_yaw" type="hinge" axis="0 0 1" damping="3"/>
 
-      <camera name="depth_cam" pos="0.22 0 0.05" xyaxes="0 -1 0 0 0 1"/>
+      <camera name="depth_cam" pos="0.33 0 0.07" xyaxes="0 -1 0 0 0 1"/>
 
-      <geom name="chassis"    type="box"      size="0.22 0.16 0.07"
+      <geom name="chassis"    type="box"      size="0.33 0.24 0.10"
             material="body_mat" contype="0" conaffinity="0" group="1"/>
-      <geom name="sensor_top" type="cylinder" size="0.06 0.04" pos="0.10 0 0.07"
+      <geom name="sensor_top" type="cylinder" size="0.09 0.06" pos="0.15 0 0.10"
             material="body_mat" contype="0" conaffinity="0" group="1"/>
       <!-- Cargo body: mass injected at runtime via model.body_mass -->
-      <body name="cargo_body" pos="0 0 0.15">
+      <body name="cargo_body" pos="0 0 0.22">
         <inertial pos="0 0 0" mass="0.001" diaginertia="1e-6 1e-6 1e-6"/>
-        <geom name="cargo" type="box" size="0.16 0.12 0.08"
+        <geom name="cargo" type="box" size="0.24 0.18 0.12"
               rgba="0 0 0 0" contype="0" conaffinity="0" group="1"/>
       </body>
 
-      <body name="wheel_left" pos="-0.05 0.18 -0.05">
+      <body name="wheel_left" pos="-0.07 0.27 -0.07">
         <joint name="wheel_left_spin" type="hinge" axis="0 1 0" damping="0.3"/>
-        <geom name="wl" type="cylinder" size="0.07 0.04"
+        <geom name="wl" type="cylinder" size="0.10 0.06"
               material="wheel_mat" contype="0" conaffinity="0"
               euler="90 0 0" group="1"/>
       </body>
 
-      <body name="wheel_right" pos="-0.05 -0.18 -0.05">
+      <body name="wheel_right" pos="-0.07 -0.27 -0.07">
         <joint name="wheel_right_spin" type="hinge" axis="0 1 0" damping="0.3"/>
-        <geom name="wr" type="cylinder" size="0.07 0.04"
+        <geom name="wr" type="cylinder" size="0.10 0.06"
               material="wheel_mat" contype="0" conaffinity="0"
               euler="90 0 0" group="1"/>
       </body>
 
-      <geom name="caster" type="sphere" size="0.04" pos="0.18 0 -0.05"
+      <geom name="caster" type="sphere" size="0.06" pos="0.27 0 -0.07"
             material="wheel_mat" contype="0" conaffinity="0" group="1"/>
     </body>
   </worldbody>
@@ -128,7 +128,7 @@ MODEL_XML = """
 # ── Sensor config ──────────────────────────────────────────────────────────────
 LIDAR_RAYS    = 36
 LIDAR_RANGE   = 5.0
-LIDAR_Z       = 0.14
+LIDAR_Z       = 0.22
 _ENV_GRP      = np.array([1, 0, 0, 0, 0, 0], dtype=np.uint8)
 _LIDAR_ANGLES = np.linspace(0, 2 * np.pi, LIDAR_RAYS, endpoint=False)
 _GEOMID_BUF   = np.array([-1], dtype=np.int32)
@@ -137,20 +137,20 @@ DEPTH_H, DEPTH_W = 64, 64
 DEPTH_INTERVAL   = 2000
 
 # ── Controller config ──────────────────────────────────────────────────────────
-GOAL       = np.array([4.0, 4.0])
+GOAL       = np.array([7.0, 7.0])
 MAX_VEL    = 0.35
 MAX_YAW    = 1.5
 K_P_POS    = 2.0
 K_P_YAW    = 3.0
-ARRIVE_R   = 0.15
-WAYPOINT_R = 0.22
-WHEEL_R    = 0.07
+ARRIVE_R   = 0.20
+WAYPOINT_R = 0.30
+WHEEL_R    = 0.10
 SAFETY_R   = 0.55   # LiDAR range below which repulsion kicks in
 
 # ── Dynamic grid config ────────────────────────────────────────────────────────
 GRID_RES  = 0.05    # m per cell
-GRID_COLS = 100     # 0 → 5 m in X
-GRID_ROWS = 100     # 0 → 5 m in Y
+GRID_COLS = 160     # 0 → 8 m in X
+GRID_ROWS = 160     # 0 → 8 m in Y
 INFLATE_R = 0.28    # inflation radius around each LiDAR hit point
 
 
@@ -321,19 +321,27 @@ def _add_ray_capsule(scn, origin, angle, dist, rgba):
     x_axis = np.cross(y_axis, z_axis)
     g           = scn.geoms[scn.ngeom]
     g.type      = mujoco.mjtGeom.mjGEOM_CAPSULE
-    g.size[:]   = [0.009, length * 0.5, 0.009]
+    g.size[:]   = [0.003, length * 0.5, 0.003]
     g.pos[:]    = mid
     g.mat[:, :] = np.column_stack([x_axis, y_axis, z_axis])
     g.rgba[:]   = rgba
     scn.ngeom  += 1
 
 
-def draw_lidar(scn, pos2d, ranges):
+_BEAM_HALF_FOV = np.radians(30)   # ±30° forward cone → ~7 beams from the 36-ray scan
+
+def draw_lidar(scn, pos2d, ranges, yaw):
     scn.ngeom = 0
-    origin    = np.array([pos2d[0], pos2d[1], LIDAR_Z])
+    origin = np.array([pos2d[0], pos2d[1], LIDAR_Z])
     for angle, r in zip(_LIDAR_ANGLES, ranges):
+        rel = (angle - yaw + np.pi) % (2 * np.pi) - np.pi   # angle relative to heading
+        if abs(rel) > _BEAM_HALF_FOV:
+            continue                                           # skip non-forward rays
         t    = r / LIDAR_RANGE
-        rgba = np.array([1.0 - t, t * 0.85, 0.0, 0.82], dtype=np.float32)
+        rgba = np.array([0.10 + 0.20 * t,
+                         0.55 + 0.20 * t,
+                         1.00,
+                         0.95 - 0.60 * t], dtype=np.float32)
         _add_ray_capsule(scn, origin, angle, r, rgba)
 
 
@@ -551,8 +559,8 @@ def main():
     print()
 
     with mujoco.viewer.launch_passive(model, data) as viewer:
-        viewer.cam.lookat[:] = [2.0, 2.0, 0.0]
-        viewer.cam.distance  = 9.5
+        viewer.cam.lookat[:] = [3.5, 3.5, 0.0]
+        viewer.cam.distance  = 16.0
         viewer.cam.elevation = -35
         viewer.cam.azimuth   = 45
 
@@ -616,7 +624,7 @@ def main():
 
             # ── Visualise ──────────────────────────────────────────────────────
             if hasattr(viewer, 'user_scn') and viewer.user_scn.maxgeom > 0:
-                draw_lidar(viewer.user_scn, pos, ranges)
+                draw_lidar(viewer.user_scn, pos, ranges, get_yaw(data))
 
             if step % DEPTH_INTERVAL == 0:
                 print_depth_stats(renderer, data, step)
