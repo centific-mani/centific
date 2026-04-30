@@ -78,6 +78,37 @@ MODEL_XML = """
     <geom name="obs_g"    type="box"      size="0.25 0.22 0.38"
           pos="3.3 3.8 0.38" material="obs_b_mat" contype="2" conaffinity="0"/>
 
+    <!-- ── Extended map obstacles – corners and mid-field ───────────────────── -->
+    <!-- Bottom-right region -->
+    <geom name="obs_h"  type="box"      size="0.30 0.35 0.55"
+          pos="5.5 0.6 0.55" material="obs_g_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_m"  type="box"      size="0.28 0.22 0.48"
+          pos="4.5 2.5 0.48" material="obs_b_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_p"  type="cylinder" size="0.24 0.52"
+          pos="6.5 2.0 0.52" material="obs_r_mat" contype="2" conaffinity="0"/>
+
+    <!-- Left side / top-left corner -->
+    <geom name="obs_i"  type="box"      size="0.32 0.28 0.62"
+          pos="0.5 5.0 0.62" material="obs_r_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_j"  type="cylinder" size="0.22 0.48"
+          pos="0.7 6.8 0.48" material="obs_b_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_q"  type="box"      size="0.38 0.25 0.42"
+          pos="1.5 7.5 0.42" material="obs_g_mat" contype="2" conaffinity="0"/>
+
+    <!-- Upper-centre region -->
+    <geom name="obs_n"  type="box"      size="0.30 0.35 0.58"
+          pos="2.5 5.2 0.58" material="obs_r_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_o"  type="cylinder" size="0.26 0.50"
+          pos="4.2 4.8 0.50" material="obs_g_mat" contype="2" conaffinity="0"/>
+
+    <!-- Top-right corner (clear path kept to goal 7,7) -->
+    <geom name="obs_k"  type="box"      size="0.40 0.30 0.65"
+          pos="6.0 5.5 0.65" material="obs_r_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_l"  type="cylinder" size="0.22 0.44"
+          pos="5.5 6.8 0.44" material="obs_g_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_r"  type="box"      size="0.28 0.32 0.50"
+          pos="7.0 4.5 0.50" material="obs_b_mat" contype="2" conaffinity="0"/>
+
     <body name="base" pos="0 0 0.18">
       <!-- Robot chassis mass = 20 kg, drives the capacity calculation -->
       <inertial pos="0 0 0" mass="20" diaginertia="0.45 0.81 1.10"/>
