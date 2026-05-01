@@ -1,0 +1,485 @@
+<mujoco model="warehouse_integrated">
+  <compiler angle="radian" meshdir="franka_emika_panda/assets" autolimits="true"/>
+  <option gravity="0 0 -9.81" timestep="0.005" integrator="implicitfast"/>
+
+  <visual>
+    <headlight diffuse="0.8 0.8 0.8" ambient="0.4 0.4 0.4" specular="0 0 0"/>
+    <rgba haze="0.8 0.9 1.0 1"/>
+  </visual>
+
+  <!-- Panda defaults (class="panda") -->
+  <default>
+    <default class="panda">
+      <material specular="0.5" shininess="0.25" />
+      <joint armature="0.1" damping="1" axis="0 0 1" range="-2.8973 2.8973" />
+      <general dyntype="none" biastype="affine" ctrlrange="-2.8973 2.8973" forcerange="-87 87" />
+      <default class="finger">
+        <joint axis="0 1 0" type="slide" range="0 0.04" />
+      </default>
+
+      <default class="visual">
+        <geom type="mesh" contype="0" conaffinity="0" group="2" />
+      </default>
+      <default class="collision">
+        <geom type="mesh" group="3" />
+        <default class="fingertip_pad_collision_1">
+          <geom type="box" size="0.0085 0.004 0.0085" pos="0 0.0055 0.0445" />
+        </default>
+        <default class="fingertip_pad_collision_2">
+          <geom type="box" size="0.003 0.002 0.003" pos="0.0055 0.002 0.05" />
+        </default>
+        <default class="fingertip_pad_collision_3">
+          <geom type="box" size="0.003 0.002 0.003" pos="-0.0055 0.002 0.05" />
+        </default>
+        <default class="fingertip_pad_collision_4">
+          <geom type="box" size="0.003 0.002 0.0035" pos="0.0055 0.002 0.0395" />
+        </default>
+        <default class="fingertip_pad_collision_5">
+          <geom type="box" size="0.003 0.002 0.0035" pos="-0.0055 0.002 0.0395" />
+        </default>
+      </default>
+    </default>
+  </default>
+
+  
+
+  <asset>
+    <!-- Panda mesh assets -->
+    <material class="panda" name="white" rgba="1 1 1 1" />
+    
+    <material class="panda" name="off_white" rgba="0.901961 0.921569 0.929412 1" />
+    
+    <material class="panda" name="black" rgba="0.25 0.25 0.25 1" />
+    
+    <material class="panda" name="green" rgba="0 1 0 1" />
+    
+    <material class="panda" name="light_blue" rgba="0.039216 0.541176 0.780392 1" />
+
+    
+    
+    <mesh name="link0_c" file="link0.stl" />
+    
+    <mesh name="link1_c" file="link1.stl" />
+    
+    <mesh name="link2_c" file="link2.stl" />
+    
+    <mesh name="link3_c" file="link3.stl" />
+    
+    <mesh name="link4_c" file="link4.stl" />
+    
+    <mesh name="link5_c0" file="link5_collision_0.obj" />
+    
+    <mesh name="link5_c1" file="link5_collision_1.obj" />
+    
+    <mesh name="link5_c2" file="link5_collision_2.obj" />
+    
+    <mesh name="link6_c" file="link6.stl" />
+    
+    <mesh name="link7_c" file="link7.stl" />
+    
+    <mesh name="hand_c" file="hand.stl" />
+
+    
+    
+    <mesh file="link0_0.obj" />
+    
+    <mesh file="link0_1.obj" />
+    
+    <mesh file="link0_2.obj" />
+    
+    <mesh file="link0_3.obj" />
+    
+    <mesh file="link0_4.obj" />
+    
+    <mesh file="link0_5.obj" />
+    
+    <mesh file="link0_7.obj" />
+    
+    <mesh file="link0_8.obj" />
+    
+    <mesh file="link0_9.obj" />
+    
+    <mesh file="link0_10.obj" />
+    
+    <mesh file="link0_11.obj" />
+    
+    <mesh file="link1.obj" />
+    
+    <mesh file="link2.obj" />
+    
+    <mesh file="link3_0.obj" />
+    
+    <mesh file="link3_1.obj" />
+    
+    <mesh file="link3_2.obj" />
+    
+    <mesh file="link3_3.obj" />
+    
+    <mesh file="link4_0.obj" />
+    
+    <mesh file="link4_1.obj" />
+    
+    <mesh file="link4_2.obj" />
+    
+    <mesh file="link4_3.obj" />
+    
+    <mesh file="link5_0.obj" />
+    
+    <mesh file="link5_1.obj" />
+    
+    <mesh file="link5_2.obj" />
+    
+    <mesh file="link6_0.obj" />
+    
+    <mesh file="link6_1.obj" />
+    
+    <mesh file="link6_2.obj" />
+    
+    <mesh file="link6_3.obj" />
+    
+    <mesh file="link6_4.obj" />
+    
+    <mesh file="link6_5.obj" />
+    
+    <mesh file="link6_6.obj" />
+    
+    <mesh file="link6_7.obj" />
+    
+    <mesh file="link6_8.obj" />
+    
+    <mesh file="link6_9.obj" />
+    
+    <mesh file="link6_10.obj" />
+    
+    <mesh file="link6_11.obj" />
+    
+    <mesh file="link6_12.obj" />
+    
+    <mesh file="link6_13.obj" />
+    
+    <mesh file="link6_14.obj" />
+    
+    <mesh file="link6_15.obj" />
+    
+    <mesh file="link6_16.obj" />
+    
+    <mesh file="link7_0.obj" />
+    
+    <mesh file="link7_1.obj" />
+    
+    <mesh file="link7_2.obj" />
+    
+    <mesh file="link7_3.obj" />
+    
+    <mesh file="link7_4.obj" />
+    
+    <mesh file="link7_5.obj" />
+    
+    <mesh file="link7_6.obj" />
+    
+    <mesh file="link7_7.obj" />
+    
+    <mesh file="hand_0.obj" />
+    
+    <mesh file="hand_1.obj" />
+    
+    <mesh file="hand_2.obj" />
+    
+    <mesh file="hand_3.obj" />
+    
+    <mesh file="hand_4.obj" />
+    
+    <mesh file="finger_0.obj" />
+    
+    <mesh file="finger_1.obj" />
+  
+
+    <!-- Warehouse materials -->
+    <texture name="grid" type="2d" builtin="checker" width="512" height="512"
+             rgb1="0.85 0.85 0.90" rgb2="0.70 0.70 0.75"/>
+    <material name="floor_mat"  texture="grid" texrepeat="6 6" reflectance="0.15"/>
+    <material name="body_mat"   rgba="0.20 0.55 0.85 1"/>
+    <material name="wheel_mat"  rgba="0.15 0.15 0.15 1"/>
+    <material name="trail_mat"  rgba="1.00 0.65 0.10 0.80"/>
+    <material name="obs_r_mat"  rgba="0.75 0.28 0.18 0.90"/>
+    <material name="obs_g_mat"  rgba="0.22 0.62 0.35 0.90"/>
+    <material name="obs_b_mat"  rgba="0.20 0.40 0.90 0.90"/>
+  </asset>
+
+  <worldbody>
+    <geom name="floor" type="plane" size="10 10 0.1"
+          material="floor_mat" contype="0" conaffinity="0" pos="2 2 0"/>
+    <geom name="start_marker" type="cylinder" size="0.12 0.01" pos="0 0 0.01"
+          material="trail_mat" contype="0" conaffinity="0"/>
+
+    <!-- Load zone marker (where AMR parks to receive package) -->
+    <geom name="load_zone_marker" type="cylinder" size="0.22 0.008"
+          pos="0.45 0.50 0.01" rgba="0.10 0.90 0.30 0.55"
+          contype="0" conaffinity="0"/>
+
+    <!-- Delivery goal marker -->
+    <body name="goal_marker" mocap="true" pos="7 7 0">
+      <geom type="cylinder" size="0.20 0.012"
+            rgba="0.10 0.90 0.30 0.85" contype="0" conaffinity="0"/>
+    </body>
+
+    <!-- Warehouse obstacles -->
+    <geom name="obs_d"    type="box"      size="0.35 0.20 0.35"
+          pos="0.6 1.2 0.35"   material="obs_g_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_f"    type="cylinder" size="0.22 0.35"
+          pos="1.5 0.7 0.35"   material="obs_b_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_b"    type="box"      size="0.25 0.40 0.50"
+          pos="3.5 1.2 0.50"   material="obs_g_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_a"    type="box"      size="0.30 0.30 0.45"
+          pos="0.8 2.5 0.45"   material="obs_r_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_test" type="box"      size="0.25 0.25 0.50"
+          pos="2.2 2.0 0.50"   material="obs_r_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_e"    type="box"      size="0.22 0.25 0.40"
+          pos="3.5 3.0 0.40"   material="obs_b_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_c"    type="cylinder" size="0.20 0.40"
+          pos="2.0 3.8 0.40"   material="obs_r_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_g_1"  type="box"      size="0.25 0.22 0.38"
+          pos="3.3 3.8 0.38"   material="obs_b_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_h"    type="box"      size="0.30 0.35 0.55"
+          pos="5.5 0.6 0.55"   material="obs_g_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_m"    type="box"      size="0.28 0.22 0.48"
+          pos="4.5 2.5 0.48"   material="obs_b_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_p"    type="cylinder" size="0.24 0.52"
+          pos="6.5 2.0 0.52"   material="obs_r_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_i"    type="box"      size="0.32 0.28 0.62"
+          pos="0.5 5.0 0.62"   material="obs_r_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_j"    type="cylinder" size="0.22 0.48"
+          pos="0.7 6.8 0.48"   material="obs_b_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_q"    type="box"      size="0.38 0.25 0.42"
+          pos="1.5 7.5 0.42"   material="obs_g_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_n"    type="box"      size="0.30 0.35 0.58"
+          pos="2.5 5.2 0.58"   material="obs_r_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_o"    type="cylinder" size="0.26 0.50"
+          pos="4.2 4.8 0.50"   material="obs_g_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_k"    type="box"      size="0.40 0.30 0.65"
+          pos="6.0 5.5 0.65"   material="obs_r_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_l"    type="cylinder" size="0.22 0.44"
+          pos="5.5 6.8 0.44"   material="obs_g_mat" contype="2" conaffinity="0"/>
+    <geom name="obs_r_1"  type="box"      size="0.28 0.32 0.50"
+          pos="7.0 4.5 0.50"   material="obs_b_mat" contype="2" conaffinity="0"/>
+
+    <!-- Franka Panda arm (positioned in world) -->
+    <body name="panda_mount" pos="0.3000 0.0000 0.0000">
+      <body name="link0" childclass="panda">
+      <inertial mass="0.629769" pos="-0.041018 -0.00014 0.049974" fullinertia="0.00315 0.00388 0.004285 8.2904e-7 0.00015 8.2299e-6" />
+      <geom mesh="link0_0" material="off_white" class="visual" />
+      <geom mesh="link0_1" material="black" class="visual" />
+      <geom mesh="link0_2" material="off_white" class="visual" />
+      <geom mesh="link0_3" material="black" class="visual" />
+      <geom mesh="link0_4" material="off_white" class="visual" />
+      <geom mesh="link0_5" material="black" class="visual" />
+      <geom mesh="link0_7" material="white" class="visual" />
+      <geom mesh="link0_8" material="white" class="visual" />
+      <geom mesh="link0_9" material="black" class="visual" />
+      <geom mesh="link0_10" material="off_white" class="visual" />
+      <geom mesh="link0_11" material="white" class="visual" />
+      <geom mesh="link0_c" class="collision" />
+      <body name="link1" pos="0 0 0.333">
+        <inertial mass="4.970684" pos="0.003875 0.002081 -0.04762" fullinertia="0.70337 0.70661 0.0091170 -0.00013900 0.0067720 0.019169" />
+        <joint name="joint1" />
+        <geom material="white" mesh="link1" class="visual" />
+        <geom mesh="link1_c" class="collision" />
+        <body name="link2" quat="1 -1 0 0">
+          <inertial mass="0.646926" pos="-0.003141 -0.02872 0.003495" fullinertia="0.0079620 2.8110e-2 2.5995e-2 -3.925e-3 1.0254e-2 7.04e-4" />
+          <joint name="joint2" range="-1.7628 1.7628" />
+          <geom material="white" mesh="link2" class="visual" />
+          <geom mesh="link2_c" class="collision" />
+          <body name="link3" pos="0 -0.316 0" quat="1 1 0 0">
+            <joint name="joint3" />
+            <inertial mass="3.228604" pos="2.7518e-2 3.9252e-2 -6.6502e-2" fullinertia="3.7242e-2 3.6155e-2 1.083e-2 -4.761e-3 -1.1396e-2 -1.2805e-2" />
+            <geom mesh="link3_0" material="white" class="visual" />
+            <geom mesh="link3_1" material="white" class="visual" />
+            <geom mesh="link3_2" material="white" class="visual" />
+            <geom mesh="link3_3" material="black" class="visual" />
+            <geom mesh="link3_c" class="collision" />
+            <body name="link4" pos="0.0825 0 0" quat="1 1 0 0">
+              <inertial mass="3.587895" pos="-5.317e-2 1.04419e-1 2.7454e-2" fullinertia="2.5853e-2 1.9552e-2 2.8323e-2 7.796e-3 -1.332e-3 8.641e-3" />
+              <joint name="joint4" range="-3.0718 -0.0698" />
+              <geom mesh="link4_0" material="white" class="visual" />
+              <geom mesh="link4_1" material="white" class="visual" />
+              <geom mesh="link4_2" material="black" class="visual" />
+              <geom mesh="link4_3" material="white" class="visual" />
+              <geom mesh="link4_c" class="collision" />
+              <body name="link5" pos="-0.0825 0.384 0" quat="1 -1 0 0">
+                <inertial mass="1.225946" pos="-1.1953e-2 4.1065e-2 -3.8437e-2" fullinertia="3.5549e-2 2.9474e-2 8.627e-3 -2.117e-3 -4.037e-3 2.29e-4" />
+                <joint name="joint5" />
+                <geom mesh="link5_0" material="black" class="visual" />
+                <geom mesh="link5_1" material="white" class="visual" />
+                <geom mesh="link5_2" material="white" class="visual" />
+                <geom mesh="link5_c0" class="collision" />
+                <geom mesh="link5_c1" class="collision" />
+                <geom mesh="link5_c2" class="collision" />
+                <body name="link6" quat="1 1 0 0">
+                  <inertial mass="1.666555" pos="6.0149e-2 -1.4117e-2 -1.0517e-2" fullinertia="1.964e-3 4.354e-3 5.433e-3 1.09e-4 -1.158e-3 3.41e-4" />
+                  <joint name="joint6" range="-0.0175 3.7525" />
+                  <geom mesh="link6_0" material="off_white" class="visual" />
+                  <geom mesh="link6_1" material="white" class="visual" />
+                  <geom mesh="link6_2" material="black" class="visual" />
+                  <geom mesh="link6_3" material="white" class="visual" />
+                  <geom mesh="link6_4" material="white" class="visual" />
+                  <geom mesh="link6_5" material="white" class="visual" />
+                  <geom mesh="link6_6" material="white" class="visual" />
+                  <geom mesh="link6_7" material="light_blue" class="visual" />
+                  <geom mesh="link6_8" material="light_blue" class="visual" />
+                  <geom mesh="link6_9" material="black" class="visual" />
+                  <geom mesh="link6_10" material="black" class="visual" />
+                  <geom mesh="link6_11" material="white" class="visual" />
+                  <geom mesh="link6_12" material="green" class="visual" />
+                  <geom mesh="link6_13" material="white" class="visual" />
+                  <geom mesh="link6_14" material="black" class="visual" />
+                  <geom mesh="link6_15" material="black" class="visual" />
+                  <geom mesh="link6_16" material="white" class="visual" />
+                  <geom mesh="link6_c" class="collision" />
+                  <body name="link7" pos="0.088 0 0" quat="1 1 0 0">
+                    <inertial mass="7.35522e-01" pos="1.0517e-2 -4.252e-3 6.1597e-2" fullinertia="1.2516e-2 1.0027e-2 4.815e-3 -4.28e-4 -1.196e-3 -7.41e-4" />
+                    <joint name="joint7" />
+                    <geom mesh="link7_0" material="white" class="visual" />
+                    <geom mesh="link7_1" material="black" class="visual" />
+                    <geom mesh="link7_2" material="black" class="visual" />
+                    <geom mesh="link7_3" material="black" class="visual" />
+                    <geom mesh="link7_4" material="black" class="visual" />
+                    <geom mesh="link7_5" material="black" class="visual" />
+                    <geom mesh="link7_6" material="black" class="visual" />
+                    <geom mesh="link7_7" material="white" class="visual" />
+                    <geom mesh="link7_c" class="collision" />
+                    <body name="hand" pos="0 0 0.107" quat="0.9238795 0 0 -0.3826834">
+                      <inertial mass="0.73" pos="-0.01 0 0.03" diaginertia="0.001 0.0025 0.0017" />
+                      <geom mesh="hand_0" material="off_white" class="visual" />
+                      <geom mesh="hand_1" material="black" class="visual" />
+                      <geom mesh="hand_2" material="black" class="visual" />
+                      <geom mesh="hand_3" material="white" class="visual" />
+                      <geom mesh="hand_4" material="off_white" class="visual" />
+                      <geom mesh="hand_c" class="collision" />
+                      <body name="left_finger" pos="0 0 0.0584">
+                        <inertial mass="0.015" pos="0 0 0" diaginertia="2.375e-6 2.375e-6 7.5e-7" />
+                        <joint name="finger_joint1" class="finger" />
+                        <geom mesh="finger_0" material="off_white" class="visual" />
+                        <geom mesh="finger_1" material="black" class="visual" />
+                        <geom mesh="finger_0" class="collision" />
+                        <geom class="fingertip_pad_collision_1" />
+                        <geom class="fingertip_pad_collision_2" />
+                        <geom class="fingertip_pad_collision_3" />
+                        <geom class="fingertip_pad_collision_4" />
+                        <geom class="fingertip_pad_collision_5" />
+                      </body>
+                      <body name="right_finger" pos="0 0 0.0584" quat="0 0 0 1">
+                        <inertial mass="0.015" pos="0 0 0" diaginertia="2.375e-6 2.375e-6 7.5e-7" />
+                        <joint name="finger_joint2" class="finger" />
+                        <geom mesh="finger_0" material="off_white" class="visual" />
+                        <geom mesh="finger_1" material="black" class="visual" />
+                        <geom mesh="finger_0" class="collision" />
+                        <geom class="fingertip_pad_collision_1" />
+                        <geom class="fingertip_pad_collision_2" />
+                        <geom class="fingertip_pad_collision_3" />
+                        <geom class="fingertip_pad_collision_4" />
+                        <geom class="fingertip_pad_collision_5" />
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  
+    </body>
+
+    <!-- Conveyor belt + packages -->
+    
+    <!-- Conveyor belt -->
+    <body name="conveyor_body" pos="0.300 -0.450 0.650">
+      <geom name="conv_belt"    type="box" size="0.55 0.13 0.018"
+            rgba="0.15 0.15 0.15 1" contype="0" conaffinity="0"/>
+      <geom name="conv_s0" type="box" size="0.04 0.13 0.021"
+            pos="-0.40 0 0" rgba="0.90 0.80 0.10 1" contype="0" conaffinity="0"/>
+      <geom name="conv_s1" type="box" size="0.04 0.13 0.021"
+            pos="-0.15 0 0" rgba="0.90 0.80 0.10 1" contype="0" conaffinity="0"/>
+      <geom name="conv_s2" type="box" size="0.04 0.13 0.021"
+            pos=" 0.10 0 0" rgba="0.90 0.80 0.10 1" contype="0" conaffinity="0"/>
+      <geom name="conv_s3" type="box" size="0.04 0.13 0.021"
+            pos=" 0.35 0 0" rgba="0.90 0.80 0.10 1" contype="0" conaffinity="0"/>
+      <geom name="conv_rl" type="box" size="0.56 0.016 0.045"
+            pos="0  0.146 0.030" rgba="0.42 0.42 0.42 1" contype="0" conaffinity="0"/>
+      <geom name="conv_rr" type="box" size="0.56 0.016 0.045"
+            pos="0 -0.146 0.030" rgba="0.42 0.42 0.42 1" contype="0" conaffinity="0"/>
+      <geom type="box" size="0.025 0.025 0.325"
+            pos="-0.50  0.11 -0.325" rgba="0.28 0.28 0.28 1" contype="0" conaffinity="0"/>
+      <geom type="box" size="0.025 0.025 0.325"
+            pos="-0.50 -0.11 -0.325" rgba="0.28 0.28 0.28 1" contype="0" conaffinity="0"/>
+      <geom type="box" size="0.025 0.025 0.325"
+            pos=" 0.50  0.11 -0.325" rgba="0.28 0.28 0.28 1" contype="0" conaffinity="0"/>
+      <geom type="box" size="0.025 0.025 0.325"
+            pos=" 0.50 -0.11 -0.325" rgba="0.28 0.28 0.28 1" contype="0" conaffinity="0"/>
+    </body>
+    <!-- Package mocap bodies (kinematically controlled) -->
+    <body name="pkg_body_0" mocap="true" pos="0 0 -10">
+      <geom name="pkg_geom_0" type="box" size="0.085 0.085 0.075"
+            rgba="0.5 0.5 0.5 0" contype="0" conaffinity="0"/>
+    </body>
+    <body name="pkg_body_1" mocap="true" pos="0 0 -10">
+      <geom name="pkg_geom_1" type="box" size="0.085 0.085 0.075"
+            rgba="0.5 0.5 0.5 0" contype="0" conaffinity="0"/>
+    </body>
+    <body name="pkg_body_2" mocap="true" pos="0 0 -10">
+      <geom name="pkg_geom_2" type="box" size="0.085 0.085 0.075"
+            rgba="0.5 0.5 0.5 0" contype="0" conaffinity="0"/>
+    </body>
+    <body name="pkg_body_3" mocap="true" pos="0 0 -10">
+      <geom name="pkg_geom_3" type="box" size="0.085 0.085 0.075"
+            rgba="0.5 0.5 0.5 0" contype="0" conaffinity="0"/>
+    </body>
+
+
+    <!-- AMR robot -->
+    
+
+  </worldbody>
+
+  <tendon>
+    <fixed name="split">
+      <joint joint="finger_joint1" coef="0.5" />
+      <joint joint="finger_joint2" coef="0.5" />
+    </fixed>
+  </tendon>
+
+  
+  <equality>
+    <joint joint1="finger_joint1" joint2="finger_joint2" solimp="0.95 0.99 0.001" solref="0.005 1" />
+  </equality>
+
+  
+  <contact>
+    <exclude body1="link0" body2="link1" />
+  </contact>
+
+
+  <actuator>
+    <!-- Panda actuators (indices 0-7) -->
+    <general class="panda" name="actuator1" joint="joint1" gainprm="4500" biasprm="0 -4500 -450" />
+    
+    <general class="panda" name="actuator2" joint="joint2" gainprm="4500" biasprm="0 -4500 -450" ctrlrange="-1.7628 1.7628" />
+    
+    <general class="panda" name="actuator3" joint="joint3" gainprm="3500" biasprm="0 -3500 -350" />
+    
+    <general class="panda" name="actuator4" joint="joint4" gainprm="3500" biasprm="0 -3500 -350" ctrlrange="-3.0718 -0.0698" />
+    
+    <general class="panda" name="actuator5" joint="joint5" gainprm="2000" biasprm="0 -2000 -200" forcerange="-12 12" />
+    
+    <general class="panda" name="actuator6" joint="joint6" gainprm="2000" biasprm="0 -2000 -200" forcerange="-12 12" ctrlrange="-0.0175 3.7525" />
+    
+    <general class="panda" name="actuator7" joint="joint7" gainprm="2000" biasprm="0 -2000 -200" forcerange="-12 12" />
+    
+    
+    <general class="panda" name="actuator8" tendon="split" forcerange="-100 100" ctrlrange="0 255" gainprm="0.01568627451 0 0" biasprm="0 -100 -10" />
+  
+    <!-- AMR velocity actuators (indices 8-10) -->
+    
+  </actuator>
+</mujoco>
